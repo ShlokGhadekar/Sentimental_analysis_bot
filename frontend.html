@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sentiment Checker</title>
+</head>
+<body>
+  <h1>Check Sentiment</h1>
+  <textarea id="inputText" rows="4" cols="50"></textarea>
+  <br>
+  <button onclick="analyze()">Analyze</button>
+  <p id="result"></p>
+
+  <script>
+    async function analyze() {
+      const text = document.getElementById("inputText").value;
+      const res = await fetch("https://your-render-url.onrender.com/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      document.getElementById("result").innerText = 
+        `Sentiment: ${data.label}, Confidence: ${data.score}`;
+    }
+  </script>
+</body>
+</html>
