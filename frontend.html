@@ -1,26 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Sentiment Checker</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentiment Analyzer</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; background: #f4f4f4; }
+    textarea { width: 100%; height: 100px; margin-bottom: 1rem; }
+    button { padding: 10px 20px; font-size: 16px; }
+    #result { margin-top: 1rem; font-weight: bold; }
+  </style>
 </head>
 <body>
-  <h1>Check Sentiment</h1>
-  <textarea id="inputText" rows="4" cols="50"></textarea>
+  <h1>Customer Sentiment Analyzer</h1>
+  <textarea id="inputText" placeholder="Type your text here..."></textarea>
   <br>
-  <button onclick="analyze()">Analyze</button>
+  <button onclick="analyze()">Analyze Sentiment</button>
   <p id="result"></p>
 
   <script>
     async function analyze() {
-      const text = document.getElementById("inputText").value;
-      const res = await fetch("https://your-render-url.onrender.com/analyze", {
+      const inputText = document.getElementById("inputText").value;
+      const resultBox = document.getElementById("result");
+
+      resultBox.innerText = "Analyzing...";
+
+      const response = await fetch("https://sentimental-analysis-bot-1.onrender.com/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: inputText })
       });
-      const data = await res.json();
-      document.getElementById("result").innerText = 
-        `Sentiment: ${data.label}, Confidence: ${data.score}`;
+
+      const data = await response.json();
+
+      if (data.error) {
+        resultBox.innerText = "Error: " + data.error;
+      } else {
+        resultBox.innerText = `Sentiment: ${data.label} (Confidence: ${data.score})`;
+      }
     }
   </script>
 </body>
