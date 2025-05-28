@@ -1,46 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sentiment Analyzer</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 2rem; background: #f4f4f4; }
-    textarea { width: 100%; height: 100px; margin-bottom: 1rem; }
-    button { padding: 10px 20px; font-size: 16px; }
-    #result { margin-top: 1rem; font-weight: bold; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Sentiment Analysis Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            padding: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 1em;
+            width: 300px;
+        }
+        button {
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+    </style>
 </head>
 <body>
-  <h1>Customer Sentiment Analyzer</h1>
-  <textarea id="inputText" placeholder="Type your text here..."></textarea>
-  <br>
-  <button onclick="analyze()">Analyze Sentiment</button>
-  <p id="result"></p>
+    <h1>Sentiment Analysis</h1>
+    <input type="text" id="textInput" placeholder="Enter your text here">
+    <button onclick="analyze()">Analyze</button>
+    <div id="result"></div>
 
-  <script>
-    async function analyze() {
-      const inputText = document.getElementById("inputText").value;
-      const resultBox = document.getElementById("result");
+    <script>
+        async function analyze() {
+            const text = document.getElementById("textInput").value;
+            const resultDiv = document.getElementById("result");
 
-      resultBox.innerText = "Analyzing...";
+            resultDiv.innerText = "Analyzing...";
 
-      const response = await fetch("https://sentimental-analysis-bot-1.onrender.com/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text: inputText })
-      });
+            try {
+                const response = await fetch("/analyze", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text })
+                });
 
-      const data = await response.json();
+                const data = await response.json();
 
-      if (data.error) {
-        resultBox.innerText = "Error: " + data.error;
-      } else {
-        resultBox.innerText = `Sentiment: ${data.label} (Confidence: ${data.score})`;
-      }
-    }
-  </script>
+                if (response.ok) {
+                    resultDiv.innerText = `Sentiment: ${data.label} (Score: ${data.score})`;
+                } else {
+                    resultDiv.innerText = `Error: ${data.detail || data.error}`;
+                }
+            } catch (error) {
+                resultDiv.innerText = `Request failed: ${error}`;
+            }
+        }
+    </script>
 </body>
 </html>
