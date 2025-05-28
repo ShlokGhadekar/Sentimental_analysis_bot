@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import requests
+import os
 
 app = FastAPI()
 
 API_URL = "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english"
-API_TOKEN = "hf_your_actual_token_here"
+API_TOKEN = os.getenv("HF_TOKEN")  # store this securely
 
 headers = {
     "Authorization": f"Bearer {API_TOKEN}"
@@ -22,13 +23,9 @@ def analyze_sentiment(input: TextInput):
 
     if isinstance(result, dict) and result.get("error"):
         return {"error": result["error"]}
-    
+
     prediction = result[0][0]
     return {
         "label": prediction["label"],
         "score": round(prediction["score"], 4)
     }
-
-@app.get("/")
-def root():
-    return {"message": "Sentiment analysis using Hugging Face API"}
