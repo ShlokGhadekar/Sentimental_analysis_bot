@@ -1,37 +1,34 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from pydantic import BaseModel
-from transformers import pipeline
-from fastapi.middleware.cors import CORSMiddleware
+import requests
 
-# Initialize FastAPI app
 app = FastAPI()
 
-# Enable CORS (so frontend can call the API)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Replace with your frontend URL in production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+API_URL = "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english"
+API_TOKEN = "hf_your_actual_token_here"
 
-# Load Hugging Face sentiment analysis pipeline
-sentiment_pipeline = pipeline("sentiment-analysis")
+headers = {
+    "Authorization": f"Bearer {API_TOKEN}"
+}
 
-# Define request body format
 class TextInput(BaseModel):
     text: str
 
-# Define the sentiment analysis route
 @app.post("/analyze")
-async def analyze_sentiment(input: TextInput):
-    result = sentiment_pipeline(input.text)[0]
+def analyze_sentiment(input: TextInput):
+    payload = {"inputs": input.text}
+    response = requests.post(API_URL, headers=headers, json=payload)
+    result = response.json()
+
+    if isinstance(result, dict) and result.get("error"):
+        return {"error": result["error"]}
+    
+    prediction = result[0][0]
     return {
-        "label": result["label"],
-        "score": round(result["score"], 4)
+        "label": prediction["label"],
+        "score": round(prediction["score"], 4)
     }
 
-# Root endpoint for testing
 @app.get("/")
-async def root():
-    return {"message": "Sentiment Analysis API is running"}
+def root():
+    return {"message": "Sentiment analysis using Hugging Face API"}
