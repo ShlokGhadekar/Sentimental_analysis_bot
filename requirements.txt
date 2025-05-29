@@ -1,0 +1,5 @@
+flask
+openai
+gspread
+python-dotenv
+oauth2client
